@@ -9,22 +9,33 @@ import org.jsoup.select.Elements;
 
 import com.lin.exception.NoTagException;
 import com.lin.exception.TagPropertyExcption;
+import com.lin.selector.Expression;
 import com.lin.selector.Parser;
+import com.lin.util.XmlFile;
 import com.lin.vo.Tag;
 
 public class Connection {
-	public static String URL;
 	public static Document DOC;
 	public static Elements ALL_Elements;
 	
-	public Connection(String url) throws IOException{
-		this.URL = url;
-		DOC = Jsoup.connect(URL).get();
+	static{
+		try {
+			XmlFile xmlFile = new XmlFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public Connection() throws IOException{
+		DOC = Jsoup.connect(XmlFile.URL).get();
 		ALL_Elements = DOC.children();
 	}
 	
 	
-	public Elements getTargetElements(List<Tag> targetTagList) throws NoTagException, TagPropertyExcption{
+	public Elements getTargetElements() throws NoTagException, TagPropertyExcption, IOException{
+		Expression expression = new Expression();
+		List<Tag> targetTagList = expression.judge();
 		Parser parser = new Parser(targetTagList);
 		Elements resultElements  = parser.parse(ALL_Elements);
 		if(resultElements.isEmpty()){

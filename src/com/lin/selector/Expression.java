@@ -1,8 +1,10 @@
 package com.lin.selector;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.lin.util.XmlFile;
 import com.lin.vo.Tag;
 
 public class Expression {
@@ -10,11 +12,10 @@ public class Expression {
 	public static final String IDCHAR = "#";
 	public static final String ESC = "\\";
 	public List<Tag> tagList = null;
-	
 	public String expressionStr;
 	
-	public Expression(String expressionStr){
-		this.expressionStr = expressionStr;
+	public Expression() throws IOException{
+		this.expressionStr = XmlFile.EXPRESSION;
 	}
 	
 	//以">"为基准，分割表达式
