@@ -22,7 +22,6 @@ public class Connection {
 		try {
 			XmlFile xmlFile = new XmlFile();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -32,12 +31,11 @@ public class Connection {
 		ALL_Elements = DOC.children();
 	}
 	
-	
 	public Elements getTargetElements() throws NoTagException, TagPropertyExcption, IOException{
 		Expression expression = new Expression();
 		List<Tag> targetTagList = expression.judge();
 		Parser parser = new Parser(targetTagList);
-		Elements resultElements  = parser.parse(ALL_Elements);
+		Elements resultElements = parser.parse(ALL_Elements);
 		if(resultElements.isEmpty()){
 			throw new NoTagException();
 		}

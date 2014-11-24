@@ -11,6 +11,7 @@ public class Parser {
 	public static List<Tag> Target_TAG_LIST;
 	public static int i = 0;
 	
+	
 	public Parser(List<Tag> targetTagList){
 		this.Target_TAG_LIST  = targetTagList;
 	}
@@ -61,13 +62,39 @@ public class Parser {
 		switch (judgeCode) {
 		//同时存在class和id的时候
 		case 0:
-			return this.findTagByClassAndId(tag, elements);
+			Elements classResult = this.findTagByClass(tag, elements);
+			Elements idResult = this.findTagById(tag, elements);
+			
+			if(classResult.isEmpty() && idResult.isEmpty()){
+				System.out.println("classResult  is  null and idResult is ");
+				return null;
+			}
+			if(classResult.isEmpty() && (idResult.isEmpty() == false)){
+				System.out.println("classResult  is null and idResult is not");
+				return idResult;
+			}
+			if((classResult.isEmpty() == false) && idResult.isEmpty()){
+				System.out.println("classResult  is not null and idResult is");
+				return classResult;
+			}
+			if(idResult.isEmpty() == false && classResult.isEmpty() == false){
+				System.out.println("both of idResult and classResult is not null");
+				if(idResult.containsAll(classResult)){
+					System.out.println("idResult.containsAll");
+					return idResult;
+				}else{
+					throw new TagPropertyExcption();
+				}
+			}
+			throw new TagPropertyExcption();
+			
+			
 		case 1:
-			return this.findTagByClass(tag, elements);
-		case 2:
-			return this.findTagById(tag, elements);
-		case 3:
 			return this.findTagOnlyWithName(tag, elements);
+		case 2:
+			return this.findTagOnlyWithName(tag, elements);
+		case 3:
+			return null;
 		default:
 			throw new TagPropertyExcption();
 		}
@@ -83,8 +110,9 @@ public class Parser {
 	 */
 	public Elements parse(Elements elements ) throws TagPropertyExcption{
 		System.out.println();
+		System.out.println("size:"+ Target_TAG_LIST.size());
 		System.out.println("i:" + i);
-		if(i > Target_TAG_LIST.size()){
+		if(i >= Target_TAG_LIST.size()){
 			System.out.println("目标标签已经找到");
 			//已经找到自己想找的标签了
 			return elements;
@@ -94,7 +122,14 @@ public class Parser {
 		//检测所查到的元素，如果没有则表示查不到该元素
 		if (resultElement.isEmpty() == true){
 			//找不到元素，进行模糊查询
-			System.out.println("targetElement is null;");
+			Elements resultElements = this.fuzzyJudge(Target_TAG_LIST.get(i), elements);
+			if(resultElements.isEmpty() == false){
+				i++;
+				resultElements = this.parse(resultElements);
+				return resultElements;
+			}else{
+				return null;
+			}
 		}else{
 			i++;
 			resultElement = this.parse(resultElement);

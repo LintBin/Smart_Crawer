@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application
+	xmlns="http://www.w3school.com.cn"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.w3school.com.cn Application.xsd">
+	<conntection>
+			<URL>http://sports.sina.com.cn/nba/2014-11-19/18517416337.shtml</URL>
+	</conntection>
+	
+	<parser>
+		<!-- <expression>body>div.wrap>div.Main>div.blkContainer>div#J_Article_Wrap>div.blkContainerSblk>div#artibody.BSHARE_POP</expression> -->
+		<expression>body>div.wrap>div.Main>div.blkContainer>div#J_Article_Wrap>div.blkContainerSblk>div#artibody.BSHARE_POP</expression>
+		<!-- 判断类型，是准确还是模糊(accurate,fuzzy)-->
+		<judgeType>accurate</judgeType>
+		
+	</parser>
+</application>
+	
