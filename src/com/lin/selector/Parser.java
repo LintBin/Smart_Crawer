@@ -8,42 +8,45 @@ import com.lin.exception.TagPropertyExcption;
 import com.lin.vo.Tag;
 
 public class Parser {
-	public static List<Tag> Target_TAG_LIST;
+	enum SITUATION{
+		WITH_CLASS_ID_NAME,WITH_CLASS_NAME,WITH_ID_NAME,WITH_NAME
+	}
+	public static List<Tag> TARGET_TAG_LIST;
 	public static int i = 0;
-	
+	public ElementsSelector elementsSelector = new ElementsSelector();
 	
 	public Parser(List<Tag> targetTagList){
-		this.Target_TAG_LIST  = targetTagList;
+		this.TARGET_TAG_LIST  = targetTagList;
 	}
 	
-	public int getJudgeCode(Tag tag){
+	public SITUATION getJudgeCode(Tag tag){
 		//同时存在class和id
 		if(tag.getTagClass() != null && tag.getTagId() != null ){
-			return 0;
+			return SITUATION.WITH_CLASS_ID_NAME;
 		}
 		//只存在class
 		if(tag.getTagClass() != null && tag.getTagId() == null){
-			return 1;
+			return SITUATION.WITH_CLASS_NAME;
 		}
 		//只存在id
 		if(tag.getTagClass() == null && tag.getTagId() != null){
-			return 2;
+			return SITUATION.WITH_ID_NAME;
 		}
 		//既不存在class，也不存在id
-		return 3;
+		return SITUATION.WITH_NAME;
 	}
 	
 	public Elements accurateJudge(Tag tag , Elements elements ) throws TagPropertyExcption{
 		System.out.println("accurateJudge is running");
-		int judgeCode = this.getJudgeCode(tag);
-		switch (judgeCode) {
-		case 0:
+		SITUATION siutuation = this.getJudgeCode(tag);
+		switch (siutuation) {
+		case WITH_CLASS_ID_NAME:
 			return this.findTagByClassAndId(tag, elements);
-		case 1:
+		case WITH_CLASS_NAME:
 			return this.findTagByClass(tag, elements);
-		case 2:
+		case WITH_ID_NAME:
 			return this.findTagById(tag, elements);
-		case 3:
+		case WITH_NAME:
 			return this.findTagOnlyWithName(tag, elements);
 		default:
 			throw new TagPropertyExcption();
@@ -58,23 +61,23 @@ public class Parser {
 	 * @throws TagPropertyExcption 
 	 */
 	public Elements fuzzyJudge(Tag tag , Elements elements) throws TagPropertyExcption{
-		int judgeCode = this.getJudgeCode(tag);
-		switch (judgeCode) {
+		SITUATION siutuation  = this.getJudgeCode(tag);
+		switch (siutuation) {
 		//同时存在class和id的时候
-		case 0:
+		case WITH_CLASS_ID_NAME:
 			Elements classResult = this.findTagByClass(tag, elements);
 			Elements idResult = this.findTagById(tag, elements);
 			
 			if(classResult.isEmpty() && idResult.isEmpty()){
-				System.out.println("classResult  is  null and idResult is ");
+				System.out.println("classResult is null and idResult is ");
 				return null;
 			}
 			if(classResult.isEmpty() && (idResult.isEmpty() == false)){
-				System.out.println("classResult  is null and idResult is not");
+				System.out.println("classResult is null and idResult is not");
 				return idResult;
 			}
 			if((classResult.isEmpty() == false) && idResult.isEmpty()){
-				System.out.println("classResult  is not null and idResult is");
+				System.out.println("classResult is not null and idResult is");
 				return classResult;
 			}
 			if(idResult.isEmpty() == false && classResult.isEmpty() == false){
@@ -87,20 +90,16 @@ public class Parser {
 				}
 			}
 			throw new TagPropertyExcption();
-			
-			
-		case 1:
+		case WITH_CLASS_NAME:
 			return this.findTagOnlyWithName(tag, elements);
-		case 2:
+		case WITH_ID_NAME:
 			return this.findTagOnlyWithName(tag, elements);
-		case 3:
+		case WITH_NAME:
 			return null;
 		default:
 			throw new TagPropertyExcption();
 		}
 	}
-	
-	
 	
 	/**
 	 * 递归遍历元素
@@ -110,31 +109,39 @@ public class Parser {
 	 */
 	public Elements parse(Elements elements ) throws TagPropertyExcption{
 		System.out.println();
-		System.out.println("size:"+ Target_TAG_LIST.size());
+		System.out.println("size:"+ TARGET_TAG_LIST.size());
 		System.out.println("i:" + i);
-		if(i >= Target_TAG_LIST.size()){
+		if(i >= TARGET_TAG_LIST.size()){
 			System.out.println("目标标签已经找到");
 			//已经找到自己想找的标签了
 			return elements;
 		}
 		System.out.println("parse method is running");
-		Elements resultElement = this.accurateJudge(Target_TAG_LIST.get(i), elements);
+		Elements resultElement = this.accurateJudge(TARGET_TAG_LIST.get(i), elements);
 		//检测所查到的元素，如果没有则表示查不到该元素
 		if (resultElement.isEmpty() == true){
 			//找不到元素，进行模糊查询
-			Elements resultElements = this.fuzzyJudge(Target_TAG_LIST.get(i), elements);
+			Elements resultElements = this.fuzzyJudge(TARGET_TAG_LIST.get(i), elements);
 			if(resultElements.isEmpty() == false){
 				i++;
 				resultElements = this.parse(resultElements);
 				return resultElements;
 			}else{
-				return null;
+				//如果模糊查询结果为空，进行列表判断
+				Integer targetElemtsNum = elementsSelector.getElementsNum();
+				if(targetElemtsNum == null){
+					System.out.println("没有元素");
+					return null;
+				}else{
+					System.out.println("还有元素");
+					return null;
+				}
 			}
 		}else{
+			elementsSelector.select(resultElement,i);
 			i++;
 			resultElement = this.parse(resultElement);
 		}
-		
 		return resultElement;
 	}
 	
